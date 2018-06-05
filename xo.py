@@ -33,7 +33,11 @@ def gather_players_names():
 
 def get_console_input(message, min_length, max_length):
     while True:
-        console_input = input("{} ({}-{} characters length)\n".format(message, min_length, max_length))
+        if min_length == max_length:
+            limit_message = "{} characters only".format(min_length)
+        else:
+            limit_message = "{}-{} characters length".format(min_length, max_length)
+        console_input = input("{} ({})\n".format(message, limit_message))
         if console_input.__len__() > max_length or console_input.__len__() < min_length:
             print("input length must be {}-{} characters! please try again".format(min_length, max_length))
 
@@ -138,7 +142,8 @@ def player_move(board, players, current_player):
         slot_letter = "O"
 
     while True:
-        chosen_slot = get_console_input(players[current_player] + " choose your slot", 2, 2).lower()
+        user_message = "{}, mark your slot ({})".format(players[current_player], slot_letter)
+        chosen_slot = get_console_input(user_message, 2, 2).lower()
         # check that slot is valid and available
         slot_location = get_slot_coordinates(board_size, chosen_slot)
         if slot_location is not None and board[slot_location[0]][slot_location[1]] == " ":
