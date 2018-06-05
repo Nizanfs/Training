@@ -16,7 +16,7 @@ def start_game():
 
         main_game_logic(players)
 
-        start_another = get_console_input("Another game? (Y/N)", 1, 1)
+        start_another = get_console_input("Another game? (Y to restart)", 1, 1)
         if start_another.lower() == "y":
             continue
         else:
@@ -45,7 +45,7 @@ def main_game_logic(players):
     game_moves = 0
     max_moves = board_size * board_size
     current_player = 0
-    board = [[' '] * board_size] * board_size
+    board = [[' '] * board_size for i in range(board_size)]
     win = False
     while game_moves < max_moves and not win:
         print_board(board)
@@ -55,6 +55,7 @@ def main_game_logic(players):
         game_moves += 1
         current_player = 1-current_player
 
+    print_board(board)
     print('Game Ended')
 
 
@@ -94,12 +95,11 @@ def player_move(board, players, current_player):
         chosen_slot = get_console_input(players[current_player] + " choose your slot", 2, 2).lower()
         # check that slot is valid and available
         slot_location = get_slot_coordinates(board_size, chosen_slot)
-        if slot_location is not None and board[slot_location[0]][slot_location[1]] == " ":
-            board[slot_location[0]][slot_location[1]] = slot_letter
+        if slot_location is not None and board[slot_location[1]][slot_location[0]] == " ":
+            board[slot_location[1]][slot_location[0]] = slot_letter
             valid_slot = True
         else:
             print('Chosen slot input is invalid! try again please')
-
 
 
 def get_slot_coordinates(board_max, slot_string):
@@ -109,7 +109,7 @@ def get_slot_coordinates(board_max, slot_string):
     if column < 0 or column > board_max or row < 0 or row > board_max:
         return None
 
-    return [column,row]
+    return [column, row]
 
 
 start_game()
