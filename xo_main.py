@@ -1,3 +1,3 @@
 import xo
 
-xo.start_game()
+xo.start_game(3)

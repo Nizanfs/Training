@@ -1,11 +1,10 @@
 import random
 import string
 
-board_size = 3
 all_letters = string.ascii_lowercase
 
 
-def start_game():
+def start_game(board_size):
 
     players = gather_players_names()
 
@@ -15,7 +14,7 @@ def start_game():
 
         print("First player to start is: " + players[0])
 
-        main_game_logic(players)
+        main_game_logic(players, board_size)
 
         start_another = get_console_input("Another game? (Y to restart)", 1, 1)
         if start_another.lower() == "y":
@@ -45,7 +44,7 @@ def get_console_input(message, min_length, max_length):
             return console_input
 
 
-def main_game_logic(players):
+def main_game_logic(players, board_size):
     game_moves = 0
     max_moves = board_size * board_size
     current_player = 0
@@ -71,6 +70,7 @@ def main_game_logic(players):
 
 
 def check_board_win(board, slot_location):
+    board_size = board[0].__len__();
     row = slot_location[0]
     column = slot_location[1]
     current_letter = board[row][column]
@@ -136,6 +136,7 @@ def print_board(board):
 
 def player_move(board, players, current_player):
     print()
+    board_size = board[0].__len__();
     # get slot
     slot_letter = "X"
     if current_player == 1:
