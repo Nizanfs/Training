@@ -25,7 +25,7 @@ def test_win_cross1():
         ["", "X", ""],
         ["X", "", ""]
     ]
-    assert xo.check_board_win(board, [2, 2]) == True
+    assert xo.check_board_win(board, [0, 2]) == True
 
 
 def test_win_cross2():
@@ -34,7 +34,7 @@ def test_win_cross2():
         ["", "X", ""],
         ["", "", "X"]
     ]
-    assert xo.check_board_win(board, [1, 1]) == True
+    assert xo.check_board_win(board, [2, 2]) == True
 
 
 def test_no_win_column():

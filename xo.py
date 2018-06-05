@@ -75,7 +75,7 @@ def check_board_win(board, slot_location):
     column = slot_location[1]
     current_letter = board[row][column]
     # check main crosses
-    if slot_location[0] == slot_location[1]:
+    if slot_location[0] == slot_location[1] or slot_location[0] == board_size - slot_location[1] - 1:
         win = True
         # check left top to right bottom
         for index in range(board_size):
