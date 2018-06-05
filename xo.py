@@ -154,7 +154,7 @@ def player_move(board, players, current_player):
 
 
 def get_slot_coordinates(board_max, slot_string):
-    column = ord(slot_string[0]) - 97
+    column = ord(slot_string[0].lower()) - 97
     row = int(slot_string[1]) - 1
 
     if column < 0 or column >= board_max or row < 0 or row >= board_max:

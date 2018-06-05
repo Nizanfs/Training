@@ -65,7 +65,18 @@ def test_no_win_cross2():
     assert xo.check_board_win(board, [0, 0]) == False
 
 
+def test_no_win_full_board():
+    board = [
+        ["X", "O", "X"],
+        ["O", "O", "X"],
+        ["X", "X", "O"]
+    ]
+    assert xo.check_board_win(board, [0, 0]) == False
+
+
 def test_get_slot_coordinates():
     assert xo.get_slot_coordinates(3, "a1") == [0, 0]
     assert xo.get_slot_coordinates(3, "b1") == [0, 1]
+    assert xo.get_slot_coordinates(3, "A1") == [0, 0]
     assert xo.get_slot_coordinates(3, "d1") is None
+    assert xo.get_slot_coordinates(3, "a4") is None
