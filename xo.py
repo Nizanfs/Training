@@ -161,6 +161,3 @@ def get_slot_coordinates(board_max, slot_string):
         return None
 
     return [row, column]
-
-
-start_game()
