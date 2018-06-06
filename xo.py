@@ -1,44 +1,42 @@
 import random
 import string
 
-all_letters = string.ascii_lowercase
+ALL_LETTERS = string.ascii_lowercase
+DEFAULT_BOARD_SIZE = 3
 
 
-def start_game(board_size):
+def start_game(board_size=DEFAULT_BOARD_SIZE):
 
     players = gather_players_names()
 
     while True:
-        # randomize play order
+        # Randomize play order.
         random.shuffle(players)
 
-        print("First player to start is: " + players[0])
+        print('First player to start is: ' + players[0])
 
         main_game_logic(players, board_size)
 
-        start_another = get_console_input("Another game? (Y to restart)", 1, 1)
-        if start_another.lower() == "y":
-            continue
-        else:
+        start_another = __get_console_input('Another game? (Y to restart)', 1, 1)
+        if start_another.lower() != 'y':
             break
 
 
 def gather_players_names():
-    player_1_name = get_console_input("Player1, what's your name?", 3, 20)
-    player_2_name = get_console_input("Player2, what's your name?", 3, 20)
+    player_1_name = __get_console_input('Player1, what\'s your name?', 3, 20)
+    player_2_name = __get_console_input('Player2, what\'s your name?', 3, 20)
 
     return [player_1_name, player_2_name]
 
 
-def get_console_input(message, min_length, max_length):
+def __get_console_input(message, min_length, max_length):
     while True:
-        if min_length == max_length:
-            limit_message = "{} characters only".format(min_length)
-        else:
-            limit_message = "{}-{} characters length".format(min_length, max_length)
-        console_input = input("{} ({})\n".format(message, limit_message))
-        if console_input.__len__() > max_length or console_input.__len__() < min_length:
-            print("input length must be {}-{} characters! please try again".format(min_length, max_length))
+        limit_message = f'{min_length} characters only' if min_length == max_length \
+            else f'{min_length}-{max_length} characters length'
+
+        console_input = input(f'{message} ({limit_message})\n')
+        if not (min_length <= len(console_input) <= max_length):
+            print(f'input length must be {min_length}-{max_length} characters! please try again')
 
         else:
             return console_input
@@ -48,106 +46,90 @@ def main_game_logic(players, board_size):
     game_moves = 0
     max_moves = board_size * board_size
     current_player = 0
-    board = [[' '] * board_size for i in range(board_size)]
-    win = False
-    while game_moves < max_moves and not win:
+    board = [[None] * board_size for i in range(board_size)]
+    is_game_over = False
+    while game_moves < max_moves and not is_game_over:
         print_board(board)
-        slot_location = player_move(board, players, current_player)
-        win = check_board_win(board, slot_location)
+        player_move(board, players, current_player)
+        is_game_over = check_board_win(board)
 
-        if not win:
+        if not is_game_over:
             game_moves += 1
-            current_player = 1-current_player
+            current_player = (current_player + 1) % 2
 
     print_board(board)
 
-    if win:
-        end_data = "{} won the game".format(players[current_player])
-    else:
-        end_data = "It's a DRAW!"
+    end_data = f'{players[current_player]} won the game' if is_game_over else 'It\'s a DRAW!'
 
-    print('GAME ENDED - {}\n\n'.format(end_data))
+    print(f'GAME ENDED - {end_data}\n\n')
 
 
-def check_board_win(board, slot_location):
-    board_size = board[0].__len__();
-    row = slot_location[0]
-    column = slot_location[1]
-    current_letter = board[row][column]
-    # check main crosses
-    if slot_location[0] == slot_location[1] or slot_location[0] == board_size - slot_location[1] - 1:
-        win = True
-        # check left top to right bottom
-        for index in range(board_size):
-            if board[index][index] != current_letter:
-                win = False
-                break
+def check_board_win(board):
+    board_size = len(board[0])
+    # Check main crosses.
 
-        if win:
-            return True
-
-        # check left bottom to right top
-        win = True
-        for index in range(board_size):
-            if board[index][board_size-index-1] != current_letter:
-                win = False
-                break
-        if win:
-            return True
-
-    # check column
-    win = True
-    for row_entry in board:
-        if row_entry[column] != current_letter:
-            win = False
-            break
-    if win:
+    # Check left top to right bottom.
+    current_letter = board[0][0]
+    if current_letter is not None and all(board[index][index] == current_letter for index in range(board_size)):
         return True
 
-    # check row
-    win = True
-    for entry in board[row]:
-        if entry != current_letter:
-            win = False
-            break
+    # Check left bottom to right top.
+    current_letter = board[0][-1]
+    if current_letter is not None and all(board[index][-index-1] == current_letter
+                                          for index in range(board_size)):
+        return True
 
-    return win
+    # Check column.
+    for columnIndex in range(board_size):
+        current_letter = board[0][columnIndex]
+        if current_letter is not None and all(board[index][columnIndex] == current_letter
+                                              for index in range(board_size)):
+            return True
+
+    # Check row.
+    for row_entry in board:
+        current_letter = row_entry[0]
+        if current_letter is not None and all(row_entry[index] == current_letter for index in range(board_size)):
+            return True
+
+    return False
 
 
 def print_board(board):
-    print("Board so far: \n")
-    # headers
+    print('Board so far: \n')
+    # Headers.
     print(' ', end='')
-    for column in range(0, board[0].__len__()):
-        print(" " + all_letters[column], end='')
+    for column in range(0, len(board[0])):
+        print(' ' + ALL_LETTERS[column], end='')
     print(' ')
 
     index = 0
     for row in board:
         index += 1
-        print("-------")
+        print('-------')
         print(index, end='')
         for entry in row:
-            print("|" + entry, end='')
-        print("|")
+            character = ' ' if entry is None else entry
+            print('|' + character, end='')
+        print('|')
 
-    print("-------")
+    print('-------')
 
 
 def player_move(board, players, current_player):
     print()
-    board_size = board[0].__len__();
-    # get slot
-    slot_letter = "X"
+    board_size = len(board[0]);
+
+    slot_letter = 'X'
     if current_player == 1:
-        slot_letter = "O"
+        slot_letter = 'O'
 
     while True:
-        user_message = "{}, mark your slot ({})".format(players[current_player], slot_letter)
-        chosen_slot = get_console_input(user_message, 2, 2).lower()
-        # check that slot is valid and available
+        user_message = f'{players[current_player]}, mark your slot ({slot_letter})'
+        chosen_slot = __get_console_input(user_message, 2, 2).lower()
+        # Check that slot is valid and available.
         slot_location = get_slot_coordinates(board_size, chosen_slot)
-        if slot_location is not None and board[slot_location[0]][slot_location[1]] == " ":
+        if slot_location is not None and board[slot_location[0]][slot_location[1]] is None:
             board[slot_location[0]][slot_location[1]] = slot_letter
             return slot_location
         else:

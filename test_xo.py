@@ -8,7 +8,7 @@ def test_win_column():
         ["X", "", ""],
         ["X", "", ""]
     ]
-    assert xo.check_board_win(board, [0, 0]) == True
+    assert xo.check_board_win(board) == True
 
 
 def test_win_row():
@@ -17,7 +17,7 @@ def test_win_row():
         ["X", "X", "X"],
         ["", "", ""]
     ]
-    assert xo.check_board_win(board, [1, 1]) == True
+    assert xo.check_board_win(board) == True
 
 
 def test_win_cross1():
@@ -26,7 +26,7 @@ def test_win_cross1():
         ["", "X", ""],
         ["X", "", ""]
     ]
-    assert xo.check_board_win(board, [0, 2]) == True
+    assert xo.check_board_win(board) == True
 
 
 def test_win_cross2():
@@ -35,7 +35,7 @@ def test_win_cross2():
         ["", "X", ""],
         ["", "", "X"]
     ]
-    assert xo.check_board_win(board, [2, 2]) == True
+    assert xo.check_board_win(board) == True
 
 
 def test_no_win_column():
@@ -44,7 +44,7 @@ def test_no_win_column():
         ["X", "", ""],
         ["O", "", ""]
     ]
-    assert xo.check_board_win(board, [0, 0]) == False
+    assert xo.check_board_win(board) == False
 
 
 def test_no_win_cross1():
@@ -53,7 +53,7 @@ def test_no_win_cross1():
         ["", "O", ""],
         ["X", "", ""]
     ]
-    assert xo.check_board_win(board, [0, 0]) == False
+    assert xo.check_board_win(board) == False
 
 
 def test_no_win_cross2():
@@ -62,7 +62,7 @@ def test_no_win_cross2():
         ["", "O", ""],
         ["", "", "X"]
     ]
-    assert xo.check_board_win(board, [0, 0]) == False
+    assert xo.check_board_win(board) == False
 
 
 def test_no_win_full_board():
@@ -71,7 +71,7 @@ def test_no_win_full_board():
         ["O", "O", "X"],
         ["X", "X", "O"]
     ]
-    assert xo.check_board_win(board, [0, 0]) == False
+    assert xo.check_board_win(board) == False
 
 
 def test_win_small_board():
@@ -79,17 +79,17 @@ def test_win_small_board():
         ["X", "X"],
         ["", ""]
     ]
-    assert xo.check_board_win(board_row, [0, 0]) == True
+    assert xo.check_board_win(board_row) == True
     board_column = [
         ["X", ""],
         ["X", ""]
     ]
-    assert xo.check_board_win(board_column, [0, 0]) == True
+    assert xo.check_board_win(board_column) == True
     board_cross = [
         ["X", ""],
         ["", "X"]
     ]
-    assert xo.check_board_win(board_cross, [0, 0]) == True
+    assert xo.check_board_win(board_cross) == True
 
 
 def test_win_big_board():
@@ -99,28 +99,28 @@ def test_win_big_board():
         ["", "", "", ""],
         ["", "", "", ""]
     ]
-    assert xo.check_board_win(board_row, [0, 0]) == True
+    assert xo.check_board_win(board_row) == True
     board_column = [
         ["X", "", "", ""],
         ["X", "", "", ""],
         ["X", "", "", ""],
         ["X", "", "", ""]
     ]
-    assert xo.check_board_win(board_column, [0, 0]) == True
+    assert xo.check_board_win(board_column) == True
     board_cross = [
         ["X", "", "", ""],
         ["", "X", "", ""],
         ["", "", "X", ""],
         ["", "", "", "X"]
     ]
-    assert xo.check_board_win(board_cross, [0, 0]) == True
+    assert xo.check_board_win(board_cross) == True
     no_win_board = [
         ["X", "X", "X", ""],
         ["", "", "X", "X"],
         ["X", "", "X", "X"],
         ["X", "X", "", "X"]
     ]
-    assert xo.check_board_win(no_win_board, [0, 0]) == False
+    assert xo.check_board_win(no_win_board) == False
 
 
 def test_get_slot_coordinates():
