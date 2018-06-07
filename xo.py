@@ -70,26 +70,26 @@ def check_board_win(board):
 
     # Check left top to right bottom.
     current_letter = board[0][0]
-    if current_letter is not None and all(board[index][index] == current_letter for index in range(board_size)):
+    if current_letter is not None and all(board[index][index] == current_letter for index in range(1, board_size)):
         return True
 
     # Check left bottom to right top.
     current_letter = board[0][-1]
     if current_letter is not None and all(board[index][-index-1] == current_letter
-                                          for index in range(board_size)):
+                                          for index in range(1, board_size)):
         return True
 
     # Check column.
     for columnIndex in range(board_size):
         current_letter = board[0][columnIndex]
         if current_letter is not None and all(board[index][columnIndex] == current_letter
-                                              for index in range(board_size)):
+                                              for index in range(1, board_size)):
             return True
 
     # Check row.
     for row_entry in board:
         current_letter = row_entry[0]
-        if current_letter is not None and all(row_entry[index] == current_letter for index in range(board_size)):
+        if current_letter is not None and all(row_entry[index] == current_letter for index in range(1, board_size)):
             return True
 
     return False
