@@ -127,7 +127,20 @@ def print_board(board):
 
 
 def player_move(board, players, current_player):
-    board_size = len(board[0]);
+    """
+    Single game move
+
+    :param board:
+        a two dimensional array representing the board status with None\X\O values
+    :param players:
+        array with players names
+    :param current_player:
+        index of current player
+    :return:
+        return the slot location represented by an array of [row, column]
+
+    """
+    board_size = len(board[0])
 
     slot_letter = 'X' if current_player == 0 else 'O'
 
