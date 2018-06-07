@@ -1,11 +1,14 @@
+BASE_CITY_INITIAL_TAX = 1000
+
+
 class City:
 
     def __init__(self):
         self.neighborhoods = {}
-        self.base_city_tax = 1000
+        self.base_city_tax = BASE_CITY_INITIAL_TAX
 
     def how_much_money(self):
-        neighborhoods_tax = sum([self.__calculate_neighborhood_tax(neighborhood) for neighborhood in self.neighborhoods])
+        neighborhoods_tax = sum([neighborhood.calculate_tax() for neighborhood in self.neighborhoods])
         return self.base_city_tax + neighborhoods_tax
 
     def build_a_neighborhood(self, neighborhood_name):
@@ -28,24 +31,14 @@ class City:
         neighborhood = self.neighborhoods[neighborhood_name]
         neighborhood.parks += 1
 
-    @staticmethod
-    def __calculate_house_tax(house):
-        return house.size * house.family_members
-
-    @staticmethod
-    def __calculate_neighborhood_committee_tax(neighborhood):
-        return (neighborhood.parks * 5) + (len(neighborhood.houses) * 3)
-
-    def __calculate_neighborhood_tax(self, neighborhood):
-        committee_tax = self.__calculate_neighborhood_committee_tax(neighborhood)
-        families_tax = sum([self.__calculate_house_tax(house) for house in neighborhood.houses])
-        return committee_tax + families_tax
-
 
 class House:
     def __init__(self, size, family_members):
         self.size = size
         self.family_members = family_members
+
+    def calculate_tax(self):
+        return self.size * self.family_members
 
 
 class Neighborhood:
@@ -53,6 +46,14 @@ class Neighborhood:
         self.name = name
         self.houses = []
         self.parks = 0
+
+    def __calculate_committee_tax(self):
+        return (self.parks * 5) + (len(self.houses) * 3)
+
+    def calculate_tax(self):
+        committee_tax = self.__calculate_committee_tax()
+        families_tax = sum([house.calculate_tax() for house in self.houses])
+        return committee_tax + families_tax
 
 
 def calculate_house_tax(house_size, family_members):
