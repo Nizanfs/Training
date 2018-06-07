@@ -67,10 +67,6 @@ class Neighborhood:
         return committee_tax + families_tax
 
 
-def calculate_house_tax(house_size, family_members):
-    return house_size * family_members
-
-
 def build_city():
     synville = City()
     synville.build_a_neighborhood(f'Neighborhood dummy1')
