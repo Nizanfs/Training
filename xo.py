@@ -65,6 +65,15 @@ def main_game_logic(players, board_size):
 
 
 def check_board_win(board):
+    """
+    This method receives the game board array and checks if there is a streak and game ended
+
+    :param board:
+        a two dimensional array representing the board status with None\X\O values
+
+    :return:
+        True if there is a win on the board (cross\vertical\horizontal)
+    """
     board_size = len(board[0])
     # Check main crosses.
 
@@ -99,6 +108,7 @@ def print_board(board):
     print('Board so far: \n')
     # Headers.
     print(' ', end='')
+    # ALL_LETTERS is used to print the correct letter symbol for the headers.
     for column in range(0, len(board[0])):
         print(' ' + ALL_LETTERS[column], end='')
     print(' ')
@@ -117,12 +127,9 @@ def print_board(board):
 
 
 def player_move(board, players, current_player):
-    print()
     board_size = len(board[0]);
 
-    slot_letter = 'X'
-    if current_player == 1:
-        slot_letter = 'O'
+    slot_letter = 'X' if current_player == 0 else 'O'
 
     while True:
         user_message = f'{players[current_player]}, mark your slot ({slot_letter})'
@@ -137,6 +144,16 @@ def player_move(board, players, current_player):
 
 
 def get_slot_coordinates(board_max, slot_string):
+    """
+    Convert slot letter and number represented string to array zero based coordinates
+
+    :param board_max:
+        board size, in order to verify if the given string is valid and not exceeding the board size
+    :param slot_string:
+        string consisted of a alphabetical letter and a number representing the board slot
+    :return:
+        a list representing the board zero based coordinates (row, column)
+    """
     column = ord(slot_string[0].lower()) - 97
     row = int(slot_string[1]) - 1
 
@@ -144,3 +161,7 @@ def get_slot_coordinates(board_max, slot_string):
         return None
 
     return [row, column]
+
+
+if __name__ == '__main__':
+    start_game()
