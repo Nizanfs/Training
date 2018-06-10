@@ -8,14 +8,17 @@ class Tqdm(collections.Iterator):
     Tqdm class will receive a given iterator and will wrap and analyze it's execution with aditional metadata such as
     running time and progress status
     """
-    def __init__(self, func):
-        original_iter = iter(func)
-        self.iter = original_iter
+
+    def __init__(self, func, length=None):
+        self.func = func
         self.index = 0
+        self.iter_length = length
 
     def __iter__(self):
-        copied_iter = copy.copy(self.iter)
-        self.iter_length = len(list(copied_iter))
+        if hasattr(self.func, '__len__'):
+            self.iter_length = len(self.func)
+
+        self.iter = iter(self.func)
         self.start_time = time.time()
         return self
 
@@ -38,6 +41,8 @@ class Tqdm(collections.Iterator):
         return next_val
 
     def _print_progress(self):
+        if self.iter_length is None:
+            return ''
         output = '['
         for index in range(self.iter_length):
             value = '#' if index < self.index else '.'
@@ -49,6 +54,10 @@ class Tqdm(collections.Iterator):
 
 
 if __name__ == '__main__':
-    for i in Tqdm(range(10)):
+    for i in Tqdm(range(4)):
         time.sleep(1)
         # print(i)
+
+    another_list = [1, 2, 3, 4]
+    for i in Tqdm(another_list):
+        time.sleep(1)
