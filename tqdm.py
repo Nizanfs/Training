@@ -26,21 +26,20 @@ class Tqdm(collections.Iterator):
         next_val = next(self.iter)
 
         self.index += 1
-        output = ''
-        output += f'Running iteration number {self.index}, '
+        output = f'Running iteration number {self.index}, '
         elapsed_seconds = time.time() - self.start_time
         output += f'Elapsed time: {elapsed_seconds:10.4} seconds, '
 
         iterations_per_second = self.index / elapsed_seconds
         output += f'Iterations per second: {iterations_per_second:10.4}, '
 
-        output += self._print_progress()
+        output += self._calculate_progress()
 
         print(f'\r{output}', flush=True, end='')
 
         return next_val
 
-    def _print_progress(self):
+    def _calculate_progress(self):
         if self.iter_length is None:
             return ''
         output = '['
