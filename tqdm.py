@@ -22,27 +22,30 @@ class Tqdm(collections.Iterator):
     def __next__(self):
         next_val = next(self.iter)
 
-        print(f'\rRunning iteration number {self.index}, ', end='')
         self.index += 1
-
+        output = ''
+        output += f'Running iteration number {self.index}, '
         elapsed_seconds = time.time() - self.start_time
-        print(f'Elapsed time: {elapsed_seconds:10.4} seconds, ', end='')
+        output += f'Elapsed time: {elapsed_seconds:10.4} seconds, '
 
         iterations_per_second = self.index / elapsed_seconds
-        print(f'Iterations per second: {iterations_per_second:10.4}', end='')
+        output += f'Iterations per second: {iterations_per_second:10.4}, '
 
-        self._print_progress()
+        output += self._print_progress()
+
+        print(f'\r{output}', flush=True, end='')
 
         return next_val
 
     def _print_progress(self):
-        print('[', end='')
+        output = '['
         for index in range(self.iter_length):
             value = '#' if index < self.index else '.'
-            print(value, end='')
-        print('], ', end='')
+            output += value
+        output += '], '
         percentage = (self.index / self.iter_length) * 100
-        print(f'Completed Percentage: {percentage}%, ', end='', flush=True)
+        output += f'Completed Percentage: {percentage}%, '
+        return output
 
 
 if __name__ == '__main__':
