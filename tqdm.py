@@ -1,6 +1,6 @@
 import collections
 import time
-import copy
+import math
 
 
 class Tqdm(collections.Iterator):
@@ -42,18 +42,26 @@ class Tqdm(collections.Iterator):
     def _calculate_progress(self):
         if self.iter_length is None:
             return ''
+        percentage = (self.index / self.iter_length) * 100
+        progress_percentage = math.floor(percentage)
+        max_progress = self.iter_length
+        current_progress = self.index
+        if self.iter_length > 100:
+            max_progress = 100
+            current_progress = math.floor(progress_percentage)
+
         output = '['
-        for index in range(self.iter_length):
-            value = '#' if index < self.index else '.'
+        for index in range(max_progress):
+            value = '#' if index < current_progress else '.'
             output += value
         output += '], '
-        percentage = (self.index / self.iter_length) * 100
+
         output += f'Completed Percentage: {percentage}%, '
         return output
 
 
 if __name__ == '__main__':
-    for i in Tqdm(range(4)):
+    for i in Tqdm(range(200)):
         time.sleep(1)
         # print(i)
 
