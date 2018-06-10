@@ -11,25 +11,25 @@ def start_game(board_size=DEFAULT_BOARD_SIZE):
 
     while True:
         # Randomize play order.
-        random.shuffle(players)
+        random.shuffle(list(players))
 
-        print('First player to start is: ' + players[0])
+        print(f'First player to start is: {players[0]}')
 
         main_game_logic(players, board_size)
 
-        start_another = __get_console_input('Another game? (Y to restart)', 1, 1)
+        start_another = _get_console_input('Another game? (Y to restart)', 1, 1)
         if start_another.lower() != 'y':
             break
 
 
 def gather_players_names():
-    player_1_name = __get_console_input('Player1, what\'s your name?', 3, 20)
-    player_2_name = __get_console_input('Player2, what\'s your name?', 3, 20)
+    player_1_name = _get_console_input('Player1, what\'s your name?', 3, 20)
+    player_2_name = _get_console_input('Player2, what\'s your name?', 3, 20)
 
-    return [player_1_name, player_2_name]
+    return player_1_name, player_2_name
 
 
-def __get_console_input(message, min_length, max_length):
+def _get_console_input(message, min_length, max_length):
     while True:
         limit_message = f'{min_length} characters only' if min_length == max_length \
             else f'{min_length}-{max_length} characters length'
@@ -119,7 +119,7 @@ def print_board(board):
         print('-------')
         print(index, end='')
         for entry in row:
-            character = ' ' if entry is None else entry
+            character = ' ' if entry is None else _get_player_letter(entry)
             print('|' + character, end='')
         print('|')
 
@@ -138,22 +138,24 @@ def player_move(board, players, current_player):
         index of current player
     :return:
         return the slot location represented by an array of [row, column]
-
     """
     board_size = len(board[0])
-
-    slot_letter = 'X' if current_player == 0 else 'O'
+    slot_letter = _get_player_letter(current_player)
 
     while True:
         user_message = f'{players[current_player]}, mark your slot ({slot_letter})'
-        chosen_slot = __get_console_input(user_message, 2, 2).lower()
+        chosen_slot = _get_console_input(user_message, 2, 2).lower()
         # Check that slot is valid and available.
         slot_location = get_slot_coordinates(board_size, chosen_slot)
         if slot_location is not None and board[slot_location[0]][slot_location[1]] is None:
-            board[slot_location[0]][slot_location[1]] = slot_letter
+            board[slot_location[0]][slot_location[1]] = current_player
             return slot_location
-        else:
-            print('Chosen slot input is invalid! try again please')
+
+        print('Chosen slot input is invalid! try again please')
+
+
+def _get_player_letter(player_index):
+    return 'X' if player_index == 0 else 'O'
 
 
 def get_slot_coordinates(board_max, slot_string):
@@ -173,7 +175,7 @@ def get_slot_coordinates(board_max, slot_string):
     if column < 0 or column >= board_max or row < 0 or row >= board_max:
         return None
 
-    return [row, column]
+    return row, column
 
 
 if __name__ == '__main__':
