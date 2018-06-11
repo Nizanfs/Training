@@ -45,6 +45,20 @@ def get_entity_by_id(entity_id, entity_type):
     return results[0] if results.count() > 0 else None
 
 
+def add_member_to_organization(terrorist_id, organization_id):
+    matched_organization = get_organization(organization_id)
+    matched_terrorist = get_terrorist(terrorist_id)
+    with db_handler.use_session() as session:
+        matched_organization.members.append(matched_terrorist)
+        session.commit()
+
+
+def add_member_to_event(terrorist_id, event_id):
+    matched_event = get_event(event_id)
+    matched_terrorist = get_terrorist(terrorist_id)
+    with db_handler.use_session() as session:
+        matched_event.participants.append(matched_terrorist)
+        session.commit()
 
 
 db_handler.create_all_tables()
