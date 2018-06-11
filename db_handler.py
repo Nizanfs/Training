@@ -14,6 +14,12 @@ def create_all_tables():
     Base.metadata.create_all(engine)
 
 
+def recreate_all_tables():
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+
+
 @contextmanager
 def use_session():
     yield session
+    # session.close()
