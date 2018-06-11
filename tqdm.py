@@ -16,7 +16,8 @@ class Tqdm(collections.Iterator):
 
     def __iter__(self):
         if hasattr(self.func, '__len__'):
-            self.iter_length = len(self.func)
+            length = len(self.func)
+            self.iter_length = length if self.iter_length is None else min(self.iter_length, length)
 
         self.iter = iter(self.func)
         self.start_time = time.time()
@@ -42,29 +43,31 @@ class Tqdm(collections.Iterator):
     def _calculate_progress(self):
         if self.iter_length is None:
             return ''
+
+        # The below section normalizes the progress to a 1-100 scale in case the length is longer than 100.
         percentage = (self.index / self.iter_length) * 100
         progress_percentage = math.floor(percentage)
         max_progress = self.iter_length
         current_progress = self.index
+    
         if self.iter_length > 100:
             max_progress = 100
             current_progress = math.floor(progress_percentage)
 
-        output = '['
-        for index in range(max_progress):
-            value = '#' if index < current_progress else '.'
-            output += value
-        output += '], '
+        output = '[{}], '.format(''.join('#' if index < current_progress else '.' for index in range(max_progress)))
 
         output += f'Completed Percentage: {percentage}%, '
         return output
 
 
-if __name__ == '__main__':
+def main():
     for i in Tqdm(range(200)):
         time.sleep(1)
-        # print(i)
 
     another_list = [1, 2, 3, 4]
     for i in Tqdm(another_list):
         time.sleep(1)
+
+
+if __name__ == '__main__':
+    main()
