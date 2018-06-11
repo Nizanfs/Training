@@ -14,7 +14,7 @@ def get_terrorist(id):
     with db_handler.use_session() as session:
         results = session.query(terrorist.Terrorist).filter(terrorist.Terrorist.id == id)
 
-    return results[0] if results is not None else None
+    return results[0] if results.count() > 0 else None
 
 
 db_handler.create_all_tables()
