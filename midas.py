@@ -1,17 +1,20 @@
-import sqlalchemy
-from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, VARCHAR
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-engine = create_engine('sqlite:///:memory:', echo=True)
-
-def add_terrorist(id, name, last_name, role, location):
-    pass
+import db_handler
+import terrorist
 
 
-class Terrorist(Base):
-    __tablename__ = 'terrorists'
-    id = Column(Integer, primary_key=True)
-    name = Column(VARCHAR(30))
-    
+def add_terrorist(name, last_name, role, location):
+    terrorist_instance = terrorist.Terrorist(name=name, last_name=last_name, role=role, location=location)
+    with db_handler.use_session() as session:
+        session.add(terrorist_instance)
+        session.commit()
+    return terrorist_instance
+
+
+def get_terrorist(id):
+    with db_handler.use_session() as session:
+        results = session.query(terrorist.Terrorist).filter(terrorist.Terrorist.id == id)
+
+    return results[0] if results is not None else None
+
+
+db_handler.create_all_tables()
