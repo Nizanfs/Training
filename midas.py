@@ -78,15 +78,37 @@ def get_last_event_participated_in(session):
 
 
 def get_organizations_members_count(session):
-    pass
+    all_organization = session.query(Organization).all()
+    result = {}
+    for o in all_organization:
+        result[o.id] = len(o.members)
+
+    return result
 
 
 def get_organizations_count_per_event(session):
-    pass
+    all_events = session.query(Event).all()
+    result = {}
+    for e in all_events:
+        organizations = set([t.organization.id for t in e.participants])
+        result[e.id] = len(organizations)
+
+    return result
 
 
 def get_people_you_may_know(session):
-    pass
+    all_terrorists = session.query(Terrorist).all()
+    result = {}
+    for t in all_terrorists:
+        possible_know = []
+        result[t.id] = possible_know
+        for t1 in all_terrorists:
+            t_event_ids = set(e.id for e in t.events)
+            t1_event_ids = set(e.id for e in t1.events)
+            if t.id != t1.id and len(set.intersection(t_event_ids, t1_event_ids)) > 0:
+                possible_know.append(t1.id)
+
+    return result
 
 
 db_handler.create_all_tables()

@@ -29,7 +29,8 @@ def db_session(session_setup):
                        midas.add_terrorist(session_setup, 'Imad', 'Mughniyah', 'Explosives Expert', 'Damascus').id,
                        midas.add_terrorist(session_setup, 'Ibrahim', 'Salih Mohammed Al-Yacoub', 'Weapons Expert', 'USA').id,
                        midas.add_terrorist(session_setup, 'Osama', 'Bin Laden', 'Planner', 'Africa').id,
-                       midas.add_terrorist(session_setup, 'Ahmed', 'Bin Iber', 'Explosives Expert', 'USA').id])
+                       midas.add_terrorist(session_setup, 'Ahmed', 'Bin Iber', 'Explosives Expert', 'USA').id,
+                       midas.add_terrorist(session_setup, 'Yusuf', 'Akber', 'Decoy', 'Jordan').id])
 
     events.extend([midas.add_event(session_setup, 'New York', datetime.now() + timedelta(days=-30)).id,
                    midas.add_event(session_setup, 'Tel Aviv', datetime.now()).id,
@@ -41,6 +42,7 @@ def db_session(session_setup):
     midas.add_member_to_organization(session_setup, terrorists[2], organizations[1])
     midas.add_member_to_organization(session_setup, terrorists[3], organizations[1])
     midas.add_member_to_organization(session_setup, terrorists[4], organizations[0])
+    midas.add_member_to_organization(session_setup, terrorists[5], organizations[0])
 
     midas.add_member_to_event(session_setup, terrorists[0], events[0])
     midas.add_member_to_event(session_setup, terrorists[0], events[1])
@@ -48,6 +50,9 @@ def db_session(session_setup):
     midas.add_member_to_event(session_setup, terrorists[2], events[0])
     midas.add_member_to_event(session_setup, terrorists[3], events[1])
     midas.add_member_to_event(session_setup, terrorists[3], events[1])
+    midas.add_member_to_event(session_setup, terrorists[0], events[2])
+    midas.add_member_to_event(session_setup, terrorists[1], events[3])
+    midas.add_member_to_event(session_setup, terrorists[5], events[3])
     return session_setup
 
 
@@ -79,10 +84,11 @@ def test_fetching_event(db_session):
 
 def test_organization_members(db_session):
     organization = midas.get_organization(db_session, organizations[0])
-    assert len(organization.members) == 3
+    assert len(organization.members) == 4
     assert organization.members[0].id == terrorists[0]
     assert organization.members[1].id == terrorists[1]
     assert organization.members[2].id == terrorists[4]
+    assert organization.members[3].id == terrorists[5]
 
 
 def test_terrorist_organization(db_session):
@@ -100,8 +106,9 @@ def test_event_participants(db_session):
 
 def test_get_members_not_kalab(db_session):
     not_kalab = midas.get_members_not_kalab(db_session)
-    assert len(not_kalab) == 3
-    assert len(set.intersection(set(not_kalab), set([1, 2, 3]))) == 3
+    actual_not_kalab = {1, 2, 3, 6}
+    assert len(not_kalab) == len(actual_not_kalab)
+    assert len(set.intersection(set(not_kalab), actual_not_kalab)) == len(actual_not_kalab)
 
 
 def test_last_event_participated_in(db_session):
@@ -110,4 +117,31 @@ def test_last_event_participated_in(db_session):
     assert terrorist_last_event_date[terrorists[4]] is None
     event_date = midas.get_event(db_session, events[1]).date
     assert terrorist_last_event_date[terrorists[0]] == event_date
-    # assert len(set.intersection(set(terrorist_last_event_date), set([1, 2, 3]))) == 3
+
+
+def test_get_organizations_members_count(db_session):
+    organization_members_count = midas.get_organizations_members_count(db_session)
+    assert len(organization_members_count) == len(organizations)
+    assert organization_members_count[organizations[0]] == 4
+    assert organization_members_count[organizations[1]] == 2
+
+
+def test_get_organizations_count_per_event(db_session):
+    organization_count_per_event = midas.get_organizations_count_per_event(db_session)
+    assert len(organization_count_per_event) == len(events)
+    assert organization_count_per_event[events[0]] == 2
+    assert organization_count_per_event[events[1]] == 2
+    assert organization_count_per_event[events[2]] == 1
+    assert organization_count_per_event[events[3]] == 1
+
+
+def test_people_you_may_know(db_session):
+    people_you_may_know = midas.get_people_you_may_know(db_session)
+    assert len(people_you_may_know) == len(terrorists)
+    assert len(people_you_may_know[terrorists[0]]) == 3
+    assert len(people_you_may_know[terrorists[1]]) == 3
+    assert len(people_you_may_know[terrorists[2]]) == 2
+    assert len(people_you_may_know[terrorists[3]]) == 1
+    assert len(people_you_may_know[terrorists[4]]) == 0
+    assert len(people_you_may_know[terrorists[5]]) == 1
+
