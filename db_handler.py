@@ -7,7 +7,6 @@ from contextlib import contextmanager
 Base = declarative_base()
 engine = create_engine('sqlite:///midas.db', echo=True)
 Session = sessionmaker(bind=engine)
-session = Session()
 
 
 def create_all_tables():
@@ -21,5 +20,6 @@ def recreate_all_tables():
 
 @contextmanager
 def use_session():
+    session = Session()
     yield session
-    # session.close()
+    session.close()
