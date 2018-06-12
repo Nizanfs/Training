@@ -15,6 +15,10 @@ class Terrorist(Base):
     events = relationship('Event', secondary='event_participants')
     organization = relationship('Organization', uselist=False, secondary='organization_members')
 
+    @staticmethod
+    def get(session):
+        return session.query(Terrorist).all()
+
     def __repr__(self):
         return f'Terrorist (id = {self.id}, name = {self.name}, last_name={self.last_name}, role={self.role},' \
                f' location={self.location})'

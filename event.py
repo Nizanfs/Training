@@ -10,5 +10,9 @@ class Event(Base):
     date = Column(DateTime)
     participants = relationship('Terrorist', secondary='event_participants')
 
+    @staticmethod
+    def get(session):
+        return session.query(Event).all()
+
     def __repr__(self):
         return f'Event (id = {self.id}, location={self.location}, datetime = {self.date})'

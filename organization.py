@@ -10,5 +10,9 @@ class Organization(Base):
     name = Column(VARCHAR(30))
     members = relationship('Terrorist', secondary='organization_members')
 
+    @staticmethod
+    def get(session):
+        return session.query(Organization).all()
+
     def __repr__(self):
         return f'Organization (id = {self.id}, prime_location={self.prime_location}, name = {self.name})'
