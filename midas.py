@@ -34,6 +34,12 @@ def get_event(session, entity_id):
 
 
 def add_entity(session, entity):
+    """
+    Persisting an entity to thje DB. Used as a base by all entity types
+    :param session:
+    :param entity:
+    :return:
+    """
     session.add(entity)
     session.commit()
     return entity
@@ -45,6 +51,14 @@ def get_entity_by_id(session, entity_id, entity_type):
 
 
 def add_member_to_organization(session, terrorist_id, organization_id):
+    """
+    Link a terrorist to an organization
+
+    :param session:
+    :param terrorist_id:
+    :param organization_id:
+    :return:
+    """
     matched_organization = get_entity_by_id(session, organization_id, Organization)
     matched_terrorist = get_entity_by_id(session, terrorist_id, Terrorist)
     matched_organization.members.append(matched_terrorist)
@@ -52,6 +66,13 @@ def add_member_to_organization(session, terrorist_id, organization_id):
 
 
 def add_member_to_event(session, terrorist_id, event_id):
+    """
+    Link a member to an event
+    :param session:
+    :param terrorist_id:
+    :param event_id:
+    :return:
+    """
     matched_event = get_entity_by_id(session, event_id, Event)
     matched_terrorist = get_entity_by_id(session, terrorist_id, Terrorist)
     matched_event.participants.append(matched_terrorist)
@@ -59,15 +80,30 @@ def add_member_to_event(session, terrorist_id, event_id):
 
 
 def get_members_not_kalab(session):
+    """
+    Get a list of members which are not stationed in the original location
+    :param session:
+    :return:
+    """
     all_terrorists = Terrorist.get(session).all()
     return [t.id for t in all_terrorists if not _is_member_kalab(t)]
 
 
 def _is_member_kalab(terrorist):
+    """
+    Check if a given terrorist is stationed in his original location
+    :param terrorist:
+    :return:
+    """
     return terrorist.location == terrorist.organization.prime_location
 
 
 def get_last_event_participated_in(session):
+    """
+    Get a dictionary of terrorist and their last event participation date. in case there was None, None will be returned
+    :param session:
+    :return:
+    """
     all_terrorists = Terrorist.get(session).all()
     result = {}
     for t in all_terrorists:
@@ -78,6 +114,11 @@ def get_last_event_participated_in(session):
 
 
 def get_organizations_members_count(session):
+    """
+    Get a dictionary of all organization ids with the count of members for each
+    :param session:
+    :return:
+    """
     all_organization = Organization.get(session).all()
     result = {}
     for o in all_organization:
@@ -87,6 +128,11 @@ def get_organizations_members_count(session):
 
 
 def get_organizations_count_per_event(session):
+    """
+    Get a dictionary of all organization ids with the count of events each participated in
+    :param session:
+    :return:
+    """
     all_events = Event.get(session).all()
     result = {}
     for e in all_events:
@@ -97,6 +143,12 @@ def get_organizations_count_per_event(session):
 
 
 def get_people_you_may_know(session):
+    """
+    Geta  dictionary of all terrorist ids with the related list of additional terrorists they might have encountered
+    based on mutual events participated in
+    :param session:
+    :return:
+    """
     all_terrorists = Terrorist.get(session).all()
     result = {}
     for t in all_terrorists:
