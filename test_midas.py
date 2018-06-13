@@ -1,8 +1,8 @@
 import midas
 import pytest
 from datetime import datetime, timedelta
-
 from db_handler import use_session, recreate_all_tables
+from terrorist import Terrorist
 
 terrorists = []
 organizations = []
@@ -27,7 +27,8 @@ def db_session(session_setup):
 
     terrorists.extend([midas.add_terrorist(session_setup, 'Hasan', 'Izz-Al-Din', 'Planner', 'Lebanon').id,
                        midas.add_terrorist(session_setup, 'Imad', 'Mughniyah', 'Explosives Expert', 'Damascus').id,
-                       midas.add_terrorist(session_setup, 'Ibrahim', 'Salih Mohammed Al-Yacoub', 'Weapons Expert', 'USA').id,
+                       midas.add_terrorist(session_setup, 'Ibrahim', 'Salih Mohammed Al-Yacoub', 'Weapons Expert', 'USA'
+                                           ).id,
                        midas.add_terrorist(session_setup, 'Osama', 'Bin Laden', 'Planner', 'Africa').id,
                        midas.add_terrorist(session_setup, 'Ahmed', 'Bin Iber', 'Explosives Expert', 'USA').id,
                        midas.add_terrorist(session_setup, 'Yusuf', 'Akber', 'Decoy', 'Jordan').id])
@@ -145,3 +146,25 @@ def test_people_you_may_know(db_session):
     assert len(people_you_may_know[terrorists[4]]) == 0
     assert len(people_you_may_know[terrorists[5]]) == 1
 
+
+def test_refine_functionality(db_session):
+    terrorist_name = 'Osama'
+    single_terrorist = list(Terrorist.get(db_session).refine(name=terrorist_name))
+    single_terrorist2 = list(Terrorist.get(db_session).refine(Terrorist.name == terrorist_name))
+    assert len(single_terrorist) == 1
+    assert single_terrorist[0].name == terrorist_name
+
+    assert len(single_terrorist2) == 1
+    assert single_terrorist2[0].name == terrorist_name
+
+    actual_usa_terrorists = ['Ibrahim', 'Ahmed']
+    usa_terrorists = Terrorist.get(db_session).refine(location='USA')
+    usa_terrorists_list = list(usa_terrorists)
+    assert len(usa_terrorists_list) == 2
+    assert usa_terrorists_list[0].name == actual_usa_terrorists[0]
+
+    ordered_terrorists = list(usa_terrorists.order_by(Terrorist.name))
+    assert len(ordered_terrorists) == 2
+    assert ordered_terrorists[0].name == actual_usa_terrorists[1]
+    single_terrorist_usa = usa_terrorists.first()
+    assert single_terrorist_usa.name == actual_usa_terrorists[0]

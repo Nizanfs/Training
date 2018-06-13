@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, VARCHAR
-from db_handler import Base
+from db_handler import Base, Refiner
 from sqlalchemy.orm import relationship
 from event_participant import EventParticipant
 from organization_members import OrganizationMember
@@ -17,7 +17,7 @@ class Terrorist(Base):
 
     @staticmethod
     def get(session):
-        return session.query(Terrorist).all()
+        return Refiner(Terrorist, session)
 
     def __repr__(self):
         return f'Terrorist (id = {self.id}, name = {self.name}, last_name={self.last_name}, role={self.role},' \

@@ -59,7 +59,7 @@ def add_member_to_event(session, terrorist_id, event_id):
 
 
 def get_members_not_kalab(session):
-    all_terrorists = Terrorist.get(session)
+    all_terrorists = Terrorist.get(session).all()
     return [t.id for t in all_terrorists if not _is_member_kalab(t)]
 
 
@@ -68,7 +68,7 @@ def _is_member_kalab(terrorist):
 
 
 def get_last_event_participated_in(session):
-    all_terrorists = Terrorist.get(session)
+    all_terrorists = Terrorist.get(session).all()
     result = {}
     for t in all_terrorists:
         last_event = max(t.date for t in t.events) if len(t.events) > 0 else None
@@ -78,7 +78,7 @@ def get_last_event_participated_in(session):
 
 
 def get_organizations_members_count(session):
-    all_organization = Organization.get(session)
+    all_organization = Organization.get(session).all()
     result = {}
     for o in all_organization:
         result[o.id] = len(o.members)
@@ -87,7 +87,7 @@ def get_organizations_members_count(session):
 
 
 def get_organizations_count_per_event(session):
-    all_events = Event.get(session)
+    all_events = Event.get(session).all()
     result = {}
     for e in all_events:
         organizations = set([t.organization.id for t in e.participants])
@@ -97,7 +97,7 @@ def get_organizations_count_per_event(session):
 
 
 def get_people_you_may_know(session):
-    all_terrorists = Terrorist.get(session)
+    all_terrorists = Terrorist.get(session).all()
     result = {}
     for t in all_terrorists:
         possible_know = []
