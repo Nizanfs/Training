@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, VARCHAR
-from db_handler import Base
+from db_handler import Base, Refiner
 from sqlalchemy.orm import relationship
 
 
@@ -12,7 +12,7 @@ class Organization(Base):
 
     @staticmethod
     def get(session):
-        return session.query(Organization).all()
+        return Refiner(Organization, session)
 
     def __repr__(self):
         return f'Organization (id = {self.id}, prime_location={self.prime_location}, name = {self.name})'
