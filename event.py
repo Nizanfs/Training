@@ -8,11 +8,11 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     location = Column(VARCHAR(256))
     date = Column(DateTime)
-    participants = relationship('Terrorist', secondary='event_participants')
+    participants = relationship('Terrorist', secondary='event_participants', back_populates='events')
 
     @staticmethod
     def get(session):
         return Refiner(Event, session)
 
     def __repr__(self):
-        return f'Event (id = {self.id}, location={self.location}, datetime = {self.date})'
+        return f'Event (location={self.location}, datetime = {self.date})'

@@ -8,11 +8,11 @@ class Organization(Base):
     id = Column(Integer, primary_key=True)
     prime_location = Column(VARCHAR(256))
     name = Column(VARCHAR(30))
-    members = relationship('Terrorist', secondary='organization_members')
+    members = relationship('Terrorist', back_populates='organization')
 
     @staticmethod
     def get(session):
         return Refiner(Organization, session)
 
     def __repr__(self):
-        return f'Organization (id = {self.id}, prime_location={self.prime_location}, name = {self.name})'
+        return f'Organization (prime_location={self.prime_location}, name = {self.name})'

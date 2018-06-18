@@ -2,8 +2,7 @@ import db_handler
 from terrorist import Terrorist
 from organization import Organization
 from event import Event
-from sqlalchemy import MetaData
-meta = MetaData()
+from sqlalchemy import desc, func
 
 
 def add_terrorist(session, name, last_name, role, location):
@@ -46,8 +45,7 @@ def add_entity(session, entity):
 
 
 def get_entity_by_id(session, entity_id, entity_type):
-    results = session.query(entity_type).filter(entity_type.id == entity_id)
-    return results[0] if results.count() > 0 else None
+    return session.query(entity_type).get(entity_id)
 
 
 def add_member_to_organization(session, terrorist_id, organization_id):
@@ -85,17 +83,9 @@ def get_members_not_kalab(session):
     :param session:
     :return:
     """
-    all_terrorists = Terrorist.get(session).all()
-    return [t.id for t in all_terrorists if not _is_member_kalab(t)]
-
-
-def _is_member_kalab(terrorist):
-    """
-    Check if a given terrorist is stationed in his original location
-    :param terrorist:
-    :return:
-    """
-    return terrorist.location == terrorist.organization.prime_location
+    not_kalab_terrorists = session.query(Terrorist).join(Terrorist.organization)\
+        .filter(Organization.prime_location != Terrorist.location)
+    return [t.id for t in not_kalab_terrorists]
 
 
 def get_last_event_participated_in(session):
@@ -104,10 +94,11 @@ def get_last_event_participated_in(session):
     :param session:
     :return:
     """
-    all_terrorists = Terrorist.get(session).all()
+    terrorist_ordered_events = session.query(Terrorist).join(Terrorist.events) \
+        .order_by(desc(Event.date))
     result = {}
-    for t in all_terrorists:
-        last_event = max(t.date for t in t.events) if len(t.events) > 0 else None
+    for t in terrorist_ordered_events:
+        last_event = t.events[0].date#max(t.date for t in t.events) if len(t.events) > 0 else None
         result[t.id] = last_event
 
     return result
@@ -119,11 +110,11 @@ def get_organizations_members_count(session):
     :param session:
     :return:
     """
-    all_organization = Organization.get(session).all()
+    organization_members_count = session.query(Organization, func.count(Terrorist.id))\
+        .join(Organization.members).group_by(Organization.id)
     result = {}
-    for o in all_organization:
-        result[o.id] = len(o.members)
-
+    for o in organization_members_count:
+        result[o[0].id] = o[1]
     return result
 
 
@@ -133,12 +124,11 @@ def get_organizations_count_per_event(session):
     :param session:
     :return:
     """
-    all_events = Event.get(session).all()
+    event_organizations_count = session.query(Event, func.count(Organization.id)) \
+        .join(Event.participants).join(Terrorist.organization).group_by(Organization.id).group_by(Event.id)
     result = {}
-    for e in all_events:
-        organizations = set([t.organization.id for t in e.participants])
-        result[e.id] = len(organizations)
-
+    for o in event_organizations_count:
+        result[o[0].id] = o[1]
     return result
 
 
@@ -149,16 +139,17 @@ def get_people_you_may_know(session):
     :param session:
     :return:
     """
-    all_terrorists = Terrorist.get(session).all()
+    events = session.query(Event).join(Event.participants).group_by(Event.id)
     result = {}
-    for t in all_terrorists:
-        possible_know = []
-        result[t.id] = possible_know
-        for t1 in all_terrorists:
-            t_event_ids = set(e.id for e in t.events)
-            t1_event_ids = set(e.id for e in t1.events)
-            if t.id != t1.id and len(set.intersection(t_event_ids, t1_event_ids)) > 0:
-                possible_know.append(t1.id)
+    for e in events:
+        for t1 in e.participants:
+            for t2 in e.participants:
+                if t1.id == t2.id:
+                    continue
+
+                if t1.id not in result:
+                    result[t1.id] = set()
+                result[t1.id].add(t2.id)
 
     return result
 

@@ -114,8 +114,8 @@ def test_get_members_not_kalab(db_session):
 
 def test_last_event_participated_in(db_session):
     terrorist_last_event_date = midas.get_last_event_participated_in(db_session)
-    assert len(terrorist_last_event_date) == len(terrorists)
-    assert terrorist_last_event_date[terrorists[4]] is None
+    assert len(terrorist_last_event_date) == len(terrorists) - 1
+    assert 4 not in terrorist_last_event_date.values()
     event_date = midas.get_event(db_session, events[1]).date
     assert terrorist_last_event_date[terrorists[0]] == event_date
 
@@ -138,12 +138,12 @@ def test_get_organizations_count_per_event(db_session):
 
 def test_people_you_may_know(db_session):
     people_you_may_know = midas.get_people_you_may_know(db_session)
-    assert len(people_you_may_know) == len(terrorists)
+    assert len(people_you_may_know) == len(terrorists) - 1
     assert len(people_you_may_know[terrorists[0]]) == 3
     assert len(people_you_may_know[terrorists[1]]) == 3
     assert len(people_you_may_know[terrorists[2]]) == 2
     assert len(people_you_may_know[terrorists[3]]) == 1
-    assert len(people_you_may_know[terrorists[4]]) == 0
+    assert 4 not in people_you_may_know.values()
     assert len(people_you_may_know[terrorists[5]]) == 1
 
 
@@ -168,3 +168,11 @@ def test_refine_functionality(db_session):
     assert ordered_terrorists[0].name == actual_usa_terrorists[1]
     single_terrorist_usa = usa_terrorists.first()
     assert single_terrorist_usa.name == actual_usa_terrorists[0]
+
+    terrorist_location = 'USA'
+    terrorist_name = 'Ahmed'
+    terrorist_role = 'Explosives Expert'
+    single_terrorist3 = list(Terrorist.get(db_session).refine(Terrorist.location == terrorist_location)
+                             .refine(role=terrorist_role))
+    assert len(single_terrorist3) == 1
+    assert single_terrorist3[0].name == terrorist_name
