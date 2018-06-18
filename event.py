@@ -15,4 +15,4 @@ class Event(Base):
         return Refiner(Event, session)
 
     def __repr__(self):
-        return f'Event (location={self.location}, datetime = {self.date})'
+        return f'Event (location={self.location}, date = {self.date})'

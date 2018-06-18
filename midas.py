@@ -2,7 +2,7 @@ import db_handler
 from terrorist import Terrorist
 from organization import Organization
 from event import Event
-from sqlalchemy import desc, func
+from sqlalchemy import func, distinct
 
 
 def add_terrorist(session, name, last_name, role, location):
@@ -94,12 +94,11 @@ def get_last_event_participated_in(session):
     :param session:
     :return:
     """
-    terrorist_ordered_events = session.query(Terrorist).join(Terrorist.events) \
-        .order_by(desc(Event.date))
+    terrorist_ordered_events = session.query(Terrorist, Event, func.max(Event.date)).join(Terrorist.events) \
+        .group_by(Terrorist.id)
     result = {}
-    for t in terrorist_ordered_events:
-        last_event = t.events[0].date#max(t.date for t in t.events) if len(t.events) > 0 else None
-        result[t.id] = last_event
+    for entry in terrorist_ordered_events:
+        result[entry.Terrorist.id] = entry[2]
 
     return result
 
@@ -114,7 +113,7 @@ def get_organizations_members_count(session):
         .join(Organization.members).group_by(Organization.id)
     result = {}
     for o in organization_members_count:
-        result[o[0].id] = o[1]
+        result[o.Organization.id] = o[1]
     return result
 
 
@@ -124,11 +123,12 @@ def get_organizations_count_per_event(session):
     :param session:
     :return:
     """
-    event_organizations_count = session.query(Event, func.count(Organization.id)) \
-        .join(Event.participants).join(Terrorist.organization).group_by(Organization.id).group_by(Event.id)
+    event_organizations_count = session.query(Event, Terrorist, Organization, func.count(distinct(Organization.id))) \
+        .join(Event.participants).join(Terrorist.organization).group_by(Event.id)
+
     result = {}
     for o in event_organizations_count:
-        result[o[0].id] = o[1]
+        result[o.Event.id] = o[3]
     return result
 
 
