@@ -1,4 +1,6 @@
-import datetime as dt
+from db_handler import use_session
+from ip_entry import IpEntry
+from sqlalchemy import func, desc
 
 
 def index(data):
@@ -9,23 +11,28 @@ def index(data):
 
     :param data: A list of 'Entry' instances to index.
     """
-    pass
+    entries = [IpEntry(ip=e.ip, protocol=e.protocol, timestamp=e.timestamp) for e in data]
+
+    with use_session() as session:
+        session.bulk_save_objects(entries)
+        session.commit()
 
 
 def get_device_histogram(ip, n):
     """
     Return the latest 'n' entries for the given 'ip'.
     """
-    return [
-        {'timestamp': dt.datetime.now(), 'protocol': 'DNS'}
-    ]
+    with use_session() as session:
+        results = session.query(IpEntry).filter(ip == ip).order_by(desc(IpEntry.timestamp)).limit(n)
+
+    return [{'timestamp': ip.timestamp, 'protocol': ip.protocol} for ip in results]
 
 
 def get_devices_status():
     """
     Return a list of every ip and the latest time it was seen it.
     """
-    return [
-        ('4.2.2.4', dt.datetime.now()),
-        ('8.8.8.8', dt.datetime.now())
-    ]
+    with use_session() as session:
+        results = session.query(IpEntry, func.max(IpEntry.timestamp)).group_by(IpEntry.ip)
+
+    return [(res.IpEntry.ip, res[1]) for res in results]
