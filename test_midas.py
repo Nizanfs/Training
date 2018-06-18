@@ -147,7 +147,7 @@ def test_people_you_may_know(db_session):
     assert len(people_you_may_know[terrorists[5]]) == 1
 
 
-def test_refine_functionality(db_session):
+def test_refine_by_name(db_session):
     terrorist_name = 'Osama'
     single_terrorist = list(Terrorist.get(db_session).refine(name=terrorist_name))
     single_terrorist2 = list(Terrorist.get(db_session).refine(Terrorist.name == terrorist_name))
@@ -157,6 +157,8 @@ def test_refine_functionality(db_session):
     assert len(single_terrorist2) == 1
     assert single_terrorist2[0].name == terrorist_name
 
+
+def test_refine_by_location(db_session):
     actual_usa_terrorists = ['Ibrahim', 'Ahmed']
     usa_terrorists = Terrorist.get(db_session).refine(location='USA')
     usa_terrorists_list = list(usa_terrorists)
@@ -169,6 +171,8 @@ def test_refine_functionality(db_session):
     single_terrorist_usa = usa_terrorists.first()
     assert single_terrorist_usa.name == actual_usa_terrorists[0]
 
+
+def test_refine_chaining(db_session):
     terrorist_location = 'USA'
     terrorist_name = 'Ahmed'
     terrorist_role = 'Explosives Expert'
