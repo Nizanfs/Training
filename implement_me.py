@@ -1,7 +1,5 @@
-from elasticsearch import Elasticsearch
 from dateutil import parser
 from elasticsearch.helpers import bulk
-
 from elastic_handler import get_elastic_client
 
 INDEX_NAME = 'entry-index'
