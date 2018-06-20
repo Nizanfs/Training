@@ -1,5 +1,7 @@
 import datetime as dt
+import redis
 
+client = redis.StrictRedis(host='localhost', port=config.REDIS_PORT)
 
 def index(data):
     """
