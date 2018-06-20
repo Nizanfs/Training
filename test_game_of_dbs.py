@@ -5,6 +5,7 @@ from dateutil import parser
 import implement_me
 import pytest
 import datasets
+from elastic_handler import start_elastic, close_elastic
 from interface import Entry
 import ipaddr
 from time import sleep
@@ -12,7 +13,13 @@ from time import sleep
 
 @pytest.fixture()
 def setup_data():
-    implement_me.clear_index()
+    try:
+        container = start_elastic()
+        implement_me.clear_index()
+        yield
+    finally:
+        if container:
+            close_elastic(container)
 
 
 def test_get_device_histogram(setup_data):

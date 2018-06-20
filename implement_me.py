@@ -1,19 +1,19 @@
-import datetime as dt
-from datetime import datetime
 from elasticsearch import Elasticsearch
 from dateutil import parser
 from elasticsearch.helpers import bulk
+
+from elastic_handler import get_elastic_client
 
 INDEX_NAME = 'entry-index'
 ENTRY_TYPE = 'ip_entry'
 MAX_DOCUMENTS = 100000
 BULK_SIZE = 1000
 
-es = Elasticsearch(f'http://localhost:9200')
+es = get_elastic_client()
 
 
 def clear_index():
-    es.indices.delete(index=INDEX_NAME)
+    es.indices.delete(index=INDEX_NAME, ignore=[400, 404])
     init_mapping()
 
 
@@ -34,7 +34,6 @@ def init_mapping():
     if not es.indices.exists(INDEX_NAME):
         es.indices.create(INDEX_NAME, index_mapping)
 
-    mapping = es.indices.get(INDEX_NAME)[INDEX_NAME]['mappings'][ENTRY_TYPE]
 
 def index(data):
     """
