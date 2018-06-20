@@ -7,10 +7,18 @@ from interface import Entry
 import ipaddr
 from time import sleep
 
+from redis_handler import start_redis, close_redis
+
 
 @pytest.fixture()
 def setup_data():
-    implement_me.clear_index()
+    try:
+        container = start_redis()
+        implement_me.clear_index()
+        yield
+    finally:
+        if container:
+            close_redis(container)
 
 
 def test_get_device_histogram(setup_data):
