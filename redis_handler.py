@@ -1,7 +1,5 @@
-from anaconda_project.requirements_registry.providers import redis
-from elasticsearch import Elasticsearch
 import docker
-import time
+import redis
 
 REDIS_PORT = 6379
 

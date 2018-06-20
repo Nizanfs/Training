@@ -3,12 +3,14 @@ from dateutil import parser
 from elasticsearch.helpers import bulk
 
 from redis_handler import get_redis_client
+SEPARATOR = '-%$#'
 
 redis = get_redis_client()
 
 
 def clear_index():
-    redis.indices.delete(index=INDEX_NAME, ignore=[400, 404])
+    # redis.indices.delete(index=INDEX_NAME, ignore=[400, 404])
+    pass
 
 
 def index(data):
@@ -19,46 +21,21 @@ def index(data):
 
     :param data: A list of 'Entry' instances to index.
     """
-    indexes = []
     for entry in data:
-        doc = dict(entry._asdict())
-        doc['_type'] = ENTRY_TYPE
-        doc['_index'] = INDEX_NAME
-        indexes.append(doc)
-        # Index in bulks.
-        if len(indexes) == BULK_SIZE:
-            bulk(redis, indexes)
-            indexes.clear()
-
-    bulk(redis, indexes)
-    redis.indices.flush()
+        # value = f'{entry.timestamp}{SEPARATOR}{entry.protocol}'
+        redis.zadd(entry.ip, entry.timestamp, entry.protocol)
 
 
 def get_device_histogram(ip, n):
     """
     Return the latest 'n' entries for the given 'ip'.
     """
-    query = {
-        'match': {'ip': ip}
-    }
+    result = []
+    for entry in redis.zrange(ip, 0, n-1):
+        values = entry.split(SEPARATOR)
+        result.append({'timestamp': parser.parse(values[0]), 'protocol': values[1]})
 
-    body = {
-        'from': 0,
-        'size': n,
-        'sort': {
-            'timestamp': {
-                'order': 'desc'
-            }
-        },
-        'query': query
-
-    }
-    redis.indices.refresh(index=INDEX_NAME)
-
-    res = redis.search(INDEX_NAME, ENTRY_TYPE, body)
-    hits = res['hits']['hits']
-    return [{'timestamp': parser.parse(ip['_source']['timestamp']), 'protocol': ip['_source']['protocol']}
-            for ip in hits]
+    return result
 
 
 def get_devices_status():
