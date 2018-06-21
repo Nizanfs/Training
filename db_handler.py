@@ -12,9 +12,13 @@ def create_all_tables():
     Base.metadata.create_all(engine)
 
 
-def recreate_all_tables():
+def delete_all_tables():
     Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+
+
+def recreate_all_tables():
+    delete_all_tables()
+    create_all_tables()
 
 
 @contextmanager

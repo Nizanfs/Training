@@ -3,14 +3,16 @@ from datetime import datetime
 import implement_me
 import pytest
 import datasets
-from db_handler import recreate_all_tables
+from db_handler import create_all_tables, delete_all_tables
 from interface import Entry
 import ipaddr
 
 
 @pytest.fixture()
 def setup_data():
-    recreate_all_tables()
+    create_all_tables()
+    yield
+    delete_all_tables()
 
 
 def test_get_device_histogram(setup_data):
@@ -63,10 +65,11 @@ def test_adding_and_fetching_s1wide(setup_data):
 
 def check_data(data, count):
     implement_me.index(data)
-    histogram = implement_me.get_device_histogram('72.126.116.190', 10)
-    assert len(histogram) == 10
     status = implement_me.get_devices_status()
     assert len(status) == count
+    num_of_timestamps = 10
+    histogram = implement_me.get_device_histogram(status[0][0], num_of_timestamps)
+    assert len(histogram) == num_of_timestamps
 
 
 def test_adding_and_fetching_s1narrow(setup_data):
