@@ -17,8 +17,12 @@ def setup_data():
         implement_me.clear_index()
         yield
     finally:
-        if container:
+        try:
             close_redis(container)
+        except UnboundLocalError:
+            pass
+        except Exception:
+            raise
 
 
 def test_get_device_histogram(setup_data):
@@ -26,7 +30,7 @@ def test_get_device_histogram(setup_data):
     protocol = 'HTTPS'
     data = []
     for i in range(10):
-        timestamp = datetime.now() + timedelta(milliseconds=500 * j)
+        timestamp = datetime.now() + timedelta(milliseconds=500 * i)
         data.append(Entry(str(ipaddr.IPAddress(ip_addr)), protocol=protocol, timestamp=timestamp))
 
     implement_me.index(data)
@@ -34,11 +38,6 @@ def test_get_device_histogram(setup_data):
     assert len(histogram) == 10
     assert histogram[-1]['timestamp'] == data[0].timestamp
     assert histogram[0]['protocol'] == protocol
-
-
-def format_time(time):
-    s = time.strftime('%Y-%m-%d %H:%M:%S.%f')
-    return parser.parse(s[:-3])
 
 
 def test_get_device_status(setup_data):
@@ -60,13 +59,13 @@ def test_get_device_status(setup_data):
     last_inserted_ip_and_timestamp_returned = status[-1]
     last_inserted_ip_and_timestamp = data[-1]
     assert last_inserted_ip_and_timestamp_returned[0] == last_inserted_ip_and_timestamp.ip
-    assert last_inserted_ip_and_timestamp_returned[1] == format_time(last_inserted_ip_and_timestamp.timestamp)
+    assert last_inserted_ip_and_timestamp_returned[1] == last_inserted_ip_and_timestamp.timestamp
 
     # Check last inserted timestamp for first ip
     first_inserted_ip_returned_status = status[0]
     first_inserted_ip_data = data[num_of_timestamps - 1]
     assert first_inserted_ip_returned_status[0] == first_inserted_ip_data.ip
-    assert first_inserted_ip_returned_status[1] == format_time(first_inserted_ip_data.timestamp)
+    assert first_inserted_ip_returned_status[1] == first_inserted_ip_data.timestamp
 
 
 def test_adding_and_fetching_s1wide(setup_data):
