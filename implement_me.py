@@ -1,4 +1,4 @@
-from dateutil import parser
+from dateutil import parser as date_parser
 from elasticsearch.helpers import bulk
 from elastic_handler import get_elastic_client
 
@@ -11,7 +11,8 @@ es = get_elastic_client()
 
 
 def clear_index():
-    es.indices.delete(index=INDEX_NAME, ignore=[400, 404])
+    if es.indices.exists(INDEX_NAME):
+        es.indices.delete(index=INDEX_NAME)
     init_mapping()
 
 
@@ -29,8 +30,7 @@ def init_mapping():
                 }
         }
     }"""
-    if not es.indices.exists(INDEX_NAME):
-        es.indices.create(INDEX_NAME, index_mapping)
+    es.indices.create(INDEX_NAME, index_mapping)
 
 
 def index(data):
@@ -41,45 +41,43 @@ def index(data):
 
     :param data: A list of 'Entry' instances to index.
     """
-    indexes = []
+    documents = []
     for entry in data:
         doc = dict(entry._asdict())
         doc['_type'] = ENTRY_TYPE
         doc['_index'] = INDEX_NAME
-        indexes.append(doc)
+        documents.append(doc)
         # Index in bulks.
-        if len(indexes) == BULK_SIZE:
-            bulk(es, indexes)
-            indexes.clear()
+        if len(documents) == BULK_SIZE:
+            bulk(es, documents)
+            documents.clear()
 
-    bulk(es, indexes)
+    bulk(es, documents)
     es.indices.flush()
+    es.indices.refresh(index=INDEX_NAME)
 
 
 def get_device_histogram(ip, n):
     """
     Return the latest 'n' entries for the given 'ip'.
     """
-    query = {
-        'match': {'ip': ip}
-    }
 
     body = {
-        'from': 0,
         'size': n,
         'sort': {
             'timestamp': {
                 'order': 'desc'
             }
         },
-        'query': query
+        'query': {
+            'match': {'ip': ip}
+        }
 
     }
-    es.indices.refresh(index=INDEX_NAME)
 
     res = es.search(INDEX_NAME, ENTRY_TYPE, body)
     hits = res['hits']['hits']
-    return [{'timestamp': parser.parse(ip['_source']['timestamp']), 'protocol': ip['_source']['protocol']}
+    return [{'timestamp': date_parser.parse(ip['_source']['timestamp']), 'protocol': ip['_source']['protocol']}
             for ip in hits]
 
 
@@ -108,8 +106,7 @@ def get_devices_status():
         }
     }
 
-    es.indices.refresh(index=INDEX_NAME)
     res = es.search(INDEX_NAME, ENTRY_TYPE, get_ips_latest_timestamp)
     buckets = res['aggregations'][ip_grouping_key]['buckets']
 
-    return [(ip['key'], parser.parse(ip[latest_timestamp_key]['value_as_string'], ignoretz=True)) for ip in buckets]
+    return [(ip['key'], date_parser.parse(ip[latest_timestamp_key]['value_as_string'], ignoretz=True)) for ip in buckets]

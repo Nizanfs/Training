@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from dateutil import parser
+from dateutil import parser as date_parser
 
 import implement_me
 import pytest
@@ -15,9 +15,10 @@ from time import sleep
 def setup_data():
     try:
         container = start_elastic()
-        implement_me.clear_index()
+        implement_me.init_mapping()
         yield
     finally:
+        implement_me.clear_index()
         if container:
             close_elastic(container)
 
@@ -38,9 +39,14 @@ def test_get_device_histogram(setup_data):
     assert histogram[0]['protocol'] == protocol
 
 
-def format_time(time):
+def truncate_time_to_milliseconds_accuracy(time):
+    """
+    This method is used to truncate the time representation to milliseconds accuracy
+    :param time: the datetime to convert
+    :return: a truncated datetime with milliseconds level
+    """
     s = time.strftime('%Y-%m-%d %H:%M:%S.%f')
-    return parser.parse(s[:-3])
+    return date_parser.parse(s[:-3])
 
 
 def test_get_device_status(setup_data):
@@ -52,8 +58,7 @@ def test_get_device_status(setup_data):
     for i in range(num_of_ips):
         ip_addr = ip_addr_base + str(i)
         for j in range(num_of_timestamps):
-            sleep(0.005)
-            timestamp = datetime.now()
+            timestamp = datetime.now() + timedelta(milliseconds=500*j)
             data.append(Entry(str(ipaddr.IPAddress(ip_addr)), protocol=protocol, timestamp=timestamp))
 
     implement_me.index(data)
@@ -63,13 +68,13 @@ def test_get_device_status(setup_data):
     last_inserted_ip_and_timestamp_returned = status[-1]
     last_inserted_ip_and_timestamp = data[-1]
     assert last_inserted_ip_and_timestamp_returned[0] == last_inserted_ip_and_timestamp.ip
-    assert last_inserted_ip_and_timestamp_returned[1] == format_time(last_inserted_ip_and_timestamp.timestamp)
+    assert last_inserted_ip_and_timestamp_returned[1] == truncate_time_to_milliseconds_accuracy(last_inserted_ip_and_timestamp.timestamp)
 
     # Check last inserted timestamp for first ip
     first_inserted_ip_returned_status = status[0]
     first_inserted_ip_data = data[num_of_timestamps - 1]
     assert first_inserted_ip_returned_status[0] == first_inserted_ip_data.ip
-    assert first_inserted_ip_returned_status[1] == format_time(first_inserted_ip_data.timestamp)
+    assert first_inserted_ip_returned_status[1] == truncate_time_to_milliseconds_accuracy(first_inserted_ip_data.timestamp)
 
 
 def test_adding_and_fetching_s1wide(setup_data):
@@ -82,8 +87,9 @@ def check_data(data, count):
     a = list(data)
     status = implement_me.get_devices_status()
     assert len(status) == count
-    histogram = implement_me.get_device_histogram(status[0][0], 10)
-    assert len(histogram) == 10
+    num_of_timestamps = 10
+    histogram = implement_me.get_device_histogram(status[0][0], num_of_timestamps)
+    assert len(histogram) == num_of_timestamps
 
 
 def test_adding_and_fetching_s1narrow(setup_data):
