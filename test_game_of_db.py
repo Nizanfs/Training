@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import parser
 import implement_me
 import pytest
@@ -26,8 +26,7 @@ def test_get_device_histogram(setup_data):
     protocol = 'HTTPS'
     data = []
     for i in range(10):
-        timestamp = datetime.now()
-        sleep(0.005)
+        timestamp = datetime.now() + timedelta(milliseconds=500 * j)
         data.append(Entry(str(ipaddr.IPAddress(ip_addr)), protocol=protocol, timestamp=timestamp))
 
     implement_me.index(data)
@@ -51,8 +50,7 @@ def test_get_device_status(setup_data):
     for i in range(num_of_ips):
         ip_addr = ip_addr_base + str(i)
         for j in range(num_of_timestamps):
-            sleep(0.005)
-            timestamp = datetime.now()
+            timestamp = datetime.now() + timedelta(milliseconds=500*j)
             data.append(Entry(str(ipaddr.IPAddress(ip_addr)), protocol=protocol, timestamp=timestamp))
 
     implement_me.index(data)
