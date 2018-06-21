@@ -28,8 +28,7 @@ def test_get_device_histogram(setup_data):
     protocol = 'HTTPS'
     data = []
     for i in range(10):
-        timestamp = datetime.now()
-        sleep(0.005)
+        timestamp = datetime.now() + timedelta(milliseconds=500 * j)
         data.append(Entry(str(ipaddr.IPAddress(ip_addr)), protocol=protocol, timestamp=timestamp))
 
     implement_me.index(data)
